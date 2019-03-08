@@ -47,19 +47,13 @@
             width: 100%;
         }
         #tags{
-            width: 420px;
+            width: 572px;
             height: 40px;
             position: fixed;
             top: 50px;
             font-size: 20px;
         }
-        #sear{
-            width:100px;
-            height:47px;
-            position: fixed;
-            left: 530px;
-            top:50px;
-        }
+
         #nav{
             background: green;
             width: 100%;
@@ -106,7 +100,7 @@
     <div class="add_result_wrap">
 
         <input id="tags">
-        <button id="sear">search</button>
+
         <div class="add_result_content">
 
         </div>
@@ -118,6 +112,7 @@
 <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=BNfhaSSFf3ZzQCpqXvqgWOeGFKty46cG"></script>
 <script>
+
     var map = new BMap.Map("demo");
     var addr_json=[
         {provice:'Hongkong',city:'hongkong',address:'Mong Kok Station',lon:114.184045,lat:22.324665,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
@@ -275,27 +270,103 @@
         $('.add_result_content').empty();
         $('#demo').height($(window).height()/1.2);
         map = new BMap.Map("demo");
-        console.log('ssss')
         map.centerAndZoom(new BMap.Point(113.90977,22.521114), 5);
-        var addressAll= [];
+        // var addressAll= [];
+        var addressList=[];
         map.enableScrollWheelZoom(true);
+
+
+
         for(var i = 0; i<addr_json.length;i++){
-            var addressPoint = [];
-            addressPoint.push(addr_json[i].lon);
-            addressPoint.push(addr_json[i].lat);
-            addressPoint.push('地址:'+addr_json[i].address);
-            addressAll.push(addressPoint);
-            $('.add_result_content').append('<li>'+addr_json[i].address+'</li>')
+                // console.log(addr_json[i].address);
+                $('.add_result_content').append('<li>'+addr_json[i].address+'</li>')
+                var addressContent=[];
+                addressContent.push(addr_json[i].lon);//0
+                addressContent.push(addr_json[i].lat);//1
+                addressContent.push('地址:'+addr_json[i].address);//2
+                addressContent.push(addr_json[i].time);//3
+                addressContent.push(addr_json[i].detail);//4
+                addressContent.push(addr_json[i].address)//5
+                addressList.push(addressContent)
         }
-        for(var i=0;i<addressAll.length;i++){
-
-
+        map.clearOverlays();
+        for(var i=0;i<addressList.length;i++){
             var myIcon = new BMap.Icon("http://a.tiles.mapbox.com/v3/marker/pin-m-w+009f9f.png", new BMap.Size(50,50));
-            var marker = new BMap.Marker(new BMap.Point(addressAll[i][0],addressAll[i][1]),{icon:myIcon});  // 创建标注
-
+            var marker = new BMap.Marker(new BMap.Point(addressList[i][0],addressList[i][1]),{icon:myIcon});  // 创建标注
+            // var content ='<div class="messageTitle">'+addressList[i][2]+'</div>'
+            var content ='<div id="menu"><ul id="nav">' +
+                '<li class="detail" onclick="detail_f(this)">store detail</li><li class="time" onclick="time_f(this)">opening time</li></ul><div id="menu_con">'+
+                '<div class="detail_con" style="display: none;"><p>'+ addressList[i][3][0]+'</p><p>'+addressList[i][3][1]+'</p></div>'+
+                '<div class="time_con" style="display: block;"><p>'+addressList[i][4][0]+'</p><p>'+addressList[i][4][1]+'</p></div>'+
+                '</div>'
             map.addOverlay(marker);
+            // var point = new BMap.Point(addressList[i][0],addressList[i][1]);
+            // var infoWindow = new BMap.InfoWindow(content,opts);
+            // map.openInfoWindow(infoWindow,point);
+            addClickHandler(content,marker);
+            //marker.enableDragging();
 
         }
+        map.addEventListener("dragging", function(evt){
+
+            var bound = map.getBounds();
+            // console.log('draging')
+            $('.add_result_content').empty();
+            for(var j = 0; j<addressList.length;j++){
+                // console.log(addressList[j]);
+                if(bound.containsPoint(new BMap.Point(addressList[j][0],addressList[j][1]))==true){
+                    // console.log(addressList[j][5])
+                    $('.add_result_content').append('<li>'+addressList[j][5]+'</li>')
+                }
+            }
+            $('.add_result_content li').click(function () {
+                var addr = $(this).text();
+                console.log(addr);
+                // 将地址解析结果显示在地图上,并调整地图视野
+                for(var i = 0;i<addressList.length;i++){
+                    if(addr==addressList[i][5]){
+                        map.centerAndZoom(new BMap.Point(addressList[i][0],addressList[i][1]),17);
+                        map.panTo(new BMap.Point(addressList[i][0],addressList[i][1]))
+                        var point = new BMap.Point(addressList[i][0],addressList[i][1]);
+                        var infoWindow = new BMap.InfoWindow(content,opts);
+                        map.openInfoWindow(infoWindow,point);
+
+                    }
+                }
+
+            })
+
+        });
+        console.log(map.getOverlays());
+        function addClickHandler(content,marker) {
+            marker.addEventListener("click",function (e) {
+
+                openInfo(content,e);
+            })
+        }
+        function openInfo(content,e) {
+            var p = e.target;
+            var point = new BMap.Point(p.getPosition().lng,p.getPosition().lat);
+            var infoWindow = new BMap.InfoWindow(content,opts);
+            map.openInfoWindow(infoWindow,point);
+
+        }
+        $('.add_result_content li').click(function () {
+            var addr = $(this).text();
+            console.log(addr);
+            // 将地址解析结果显示在地图上,并调整地图视野
+            for(var i = 0;i<addressList.length;i++){
+                if(addr==addressList[i][5]){
+                    map.centerAndZoom(new BMap.Point(addressList[i][0],addressList[i][1]),17);
+                    map.panTo(new BMap.Point(addressList[i][0],addressList[i][1]))
+                    var point = new BMap.Point(addressList[i][0],addressList[i][1]);
+                    var infoWindow = new BMap.InfoWindow(content,opts);
+                    map.openInfoWindow(infoWindow,point);
+
+                }
+            }
+
+        })
     }
 
     function detail_f(){
@@ -380,7 +451,9 @@
 
                     map.centerAndZoom(new BMap.Point(addressList[i][0],addressList[i][1]),17);
                     map.panTo(new BMap.Point(addressList[i][0],addressList[i][1]))
-
+                    var point = new BMap.Point(addressList[i][0],addressList[i][1]);
+                    var infoWindow = new BMap.InfoWindow(content,opts);
+                    map.openInfoWindow(infoWindow,point);
                 }
             }
 
