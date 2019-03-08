@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{
+            padding: 0;
+            margin: 0 auto;
+        }
+        #demo{
+            width: 100%;
+
+        }
+        .messageTitle{
+            color: green;
+        }
+        .add_result{
+            position: absolute;
+            top: 50px;
+            left: 100px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            max-width:600px ;
+            width: 593px;
+            max-height: 500px;
+            overflow-y:auto;
+            overflow-x: hidden;
+
+        }
+
+        li{
+            list-style: none;
+            border-bottom: 1px solid #ebebeb;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            cursor: pointer;
+        }
+        .add_result_content{
+            margin-top:60px;
+        }
+        .add_result_content p{
+            display: none;
+        }
+        .add_result_wrap{
+            position: relative;
+            width: 100%;
+        }
+        #tags{
+            width: 420px;
+            height: 40px;
+            position: fixed;
+            top: 50px;
+            font-size: 20px;
+        }
+        #sear{
+            width:100px;
+            height:47px;
+            position: fixed;
+            left: 530px;
+            top:50px;
+        }
+        #nav{
+            background: green;
+            width: 100%;
+            overflow: hidden;
+            padding-inline-start:0;
+
+        }
+        #nav li{
+            float: left;
+            margin-right: 10px;
+            margin-left: 10px;
+            padding-top: 10px;
+            padding-bottom: 0;
+            margin-bottom: 10px;
+            border-bottom: 0;
+        }
+        #nav li:hover{
+            border-bottom:1px solid  white;
+        }
+        li a{
+            text-decoration: none;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div id="demo"></div>
+<select name="" id="province" value="">
+    <option value="">请选择</option>
+    <option value="China">China</option>
+    <option value="Hongkong">Hongkong</option>
+    <option value="Macau">Macau</option>
+    <option value="Singapore">Singapore</option>
+</select>
+<select name="" id="city" disabled="disabled" value="">
+    <option value="">请选择</option>
+
+</select>
+
+<input type="button" class="btn" value="搜索">
+
+<div class="add_result">
+    <div class="add_result_wrap">
+
+        <input id="tags">
+        <button id="sear">search</button>
+        <div class="add_result_content">
+
+        </div>
+    </div>
+</div>
+</body>
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=BNfhaSSFf3ZzQCpqXvqgWOeGFKty46cG"></script>
+<script>
+    var map = new BMap.Map("demo");
+    var addr_json=[
+        {provice:'Hongkong',city:'hongkong',address:'Mong Kok Station',lon:114.184045,lat:22.324665,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'hongkong',address:'MTR Tsuen Wan Station',lon:114.130201,lat:22.377035,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'hongkong',address:'6D Aguilar Street, Central',lon:114.167778,lat:22.284525,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'hongkong',address:'Apita Supermarket, B1F-20, City Plaza 2, Taikoo',lon:114.228745,lat:22.289138,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'hongkong',address:'G/F & 1/F, 8 Russell Street, Causeway Bay',lon:114.193705,lat:22.281663,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'Kowloon',address:'Mannings, Shop 28, UG/F, China Hong Kong City, TST',lon:114.178999,lat:22.302933,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'NewTerritories',address:'Mannings, Shop 130, Yuen Long Plaza, Yuen Long',lon:114.0351,lat:22.447535,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Hongkong',city:'HongKong International Airport (Mannings)',address:'Unit 6MC054, Midfield Concourse, Airport',lon:113.929295,lat:22.312786,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Macau',city:'',address:'The Atrium Department Store, 203, Lion Street, Level3 Shoppes at Venetian',lon:113.572982,lat:22.152047,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'Singapore',city:'',address:'465 North Bridge Road #02-5063 Singapore 191465',lon:103.854591,lat:1.296482,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']},
+        {provice:'China',city:'Shenzhen',address:'Qianhai Shengang Cooperative, Shenzhen, China',lon:113.90977,lat:22.521114,time:['weekday:10:00-22:00','weekend:10:00-20:00'],detail:['phone:12345689','e-mail:123@qq.com']}
+    ];
+    (function(){
+
+        beginMap()
+    })()
+
+
+    //autocomplete
+    var avaliabletags = [];
+    for(var i = 0;i<addr_json.length; i++){
+        avaliabletags.push(addr_json[i].address);
+    }
+    console.log(avaliabletags);
+
+    $( "#tags" ).autocomplete({
+        source: avaliabletags
+    });
+    $("#tags").keyup(function (event) {
+        var keycode = event.which;
+        if(keycode==13){
+            $('.add_result_content').empty();
+            $('.add_result_content').append('<li>'+$('#tags').val()+'</li>')
+            var addr = $("#tags").val();
+            var map = new BMap.Map("demo");
+            console.log(addr);
+            // 将地址解析结果显示在地图上,并调整地图视野
+            for(var i = 0;i<addr_json.length;i++){
+
+                if(addr==addr_json[i].address){
+                    map.centerAndZoom(new BMap.Point(addr_json[i].lon,addr_json[i].lat),17);
+                    map.panTo(new BMap.Point(addr_json[i].lon,addr_json[i].lat))
+                    map.clearOverlays();
+                    var myIcon = new BMap.Icon("http://a.tiles.mapbox.com/v3/marker/pin-m-w+009f9f.png", new BMap.Size(50,50));
+                    var marker = new BMap.Marker(new BMap.Point(addr_json[i].lon,addr_json[i].lat),{icon:myIcon});  // 创建标注
+                    var content ='<div id="menu"><ul id="nav">' +
+                        '<li class="detail" onclick="detail_f(this)">store detail</li><li class="time" onclick="time_f(this)">opening time</li></ul><div id="menu_con">'+
+                        '<div class="detail_con" style="display: none;"><p>'+ addr_json[i].detail[0]+'</p><p>'+addr_json[i].detail[1]+'</p></div>'+
+                        '<div class="time_con" style="display: block;"><p>'+addr_json[i].time[0]+'</p><p>'+addr_json[i].time[1]+'</p></div>'+
+                        '</div>'
+                    console.log(addr_json[i].address);
+                    map.addOverlay(marker);
+                    var point = new BMap.Point(addr_json[i].lon,addr_json[i].lat);
+                    var infoWindow = new BMap.InfoWindow(content,opts);
+                    map.openInfoWindow(infoWindow,point);
+//                    addClickHandler(content,marker);
+                    //marker.enableDragging();
+                }
+                function addClickHandler(content,marker) {
+                    marker.addEventListener("click",function (e) {
+
+                        openInfo(content,e);
+                    })
+                }
+                function openInfo(content,e) {
+                    var p = e.target;
+                    var point = new BMap.Point(p.getPosition().lng,p.getPosition().lat);
+                    var infoWindow = new BMap.InfoWindow(content,opts);
+                    map.openInfoWindow(infoWindow,point);
+                }
+            }
+        }
+        if($('#tags').val()==''){
+
+            console.log('d');
+            beginMap();
+            return false;
+        }
+
+
+    })
+
+
+
+    //切换省市获取地址
+    $('#province').change(function () {
+        $('#city').empty();
+        var list = [];
+        if($('#province').val()!=''){
+            $('#city').removeAttr('disabled');
+            for(var i = 0; i<addr_json.length; i++){
+                if(addr_json[i].provice==$('#province').val()){
+                    list.push(addr_json[i].city);
+
+                }
+            }
+            let set = new Set(list);
+            var newArr = Array.from(set)
+            for(var i = 0; i<newArr.length;i++){
+                $('#city').append('<option value=\''+newArr[i]+'\'>'+newArr[i]+'</option>')
+            }
+
+        }else{
+            $('#city').attr('disabled','disabled')
+        }
+        $('#sear').click(function () {
+            var addr = $(this).text();
+            var map = new BMap.Map("demo");
+            console.log(addr);
+            // 将地址解析结果显示在地图上,并调整地图视野
+            for(var i = 0;i<addr_json.length;i++){
+                ;
+                if(addr==addr_json[i].address){
+                    console.log('sfs')
+                    map.centerAndZoom(new BMap.Point(addr_json[i].lon,addr_json[i].lat),17);
+                    map.panTo(new BMap.Point(addr_json[i].lon,addr_json[i].lat))
+                    map.clearOverlays();
+                    var myIcon = new BMap.Icon("http://a.tiles.mapbox.com/v3/marker/pin-m-w+009f9f.png", new BMap.Size(50,50));
+                    var marker = new BMap.Marker(new BMap.Point(addr_json[i].lon,addr_json[i].lat),{icon:myIcon});  // 创建标注
+                    var content ='<div id="menu"><ul id="nav">' +
+                        '<li class="detail" onclick="detail_f(this)">store detail</li><li class="time" onclick="time_f(this)">opening time</li></ul><div id="menu_con">'+
+                        '<div class="detail_con" style="display: none;"><p>'+ addressList[i][3][0]+'</p><p>'+addressList[i][3][1]+'</p></div>'+
+                        '<div class="time_con" style="display: block;"><p>'+addressList[i][4][0]+'</p><p>'+addressList[i][4][1]+'</p></div>'+
+                        '</div>'
+
+                    map.addOverlay(marker);
+                    addClickHandler(content,marker);
+                    //marker.enableDragging();
+                }
+                function addClickHandler(content,marker) {
+                    marker.addEventListener("click",function (e) {
+
+                        openInfo(content,e);
+                    })
+                }
+                function openInfo(content,e) {
+                    var p = e.target;
+                    var point = new BMap.Point(p.getPosition().lng,p.getPosition().lat);
+                    var infoWindow = new BMap.InfoWindow(content,opts);
+                    map.openInfoWindow(infoWindow,point);
+                }
+            }
+        })
+    })
+
+
+
+    //    var map = new BMap.Map("demo");
+    // map.centerAndZoom(new BMap.Point(113.30765, 23.120049), 12);
+
+    //进入页面后显示全部地点
+    function beginMap() {
+        $('.add_result_content').empty();
+        $('#demo').height($(window).height()/1.2);
+        map = new BMap.Map("demo");
+        console.log('ssss')
+        map.centerAndZoom(new BMap.Point(113.90977,22.521114), 5);
+        var addressAll= [];
+        map.enableScrollWheelZoom(true);
+        for(var i = 0; i<addr_json.length;i++){
+            var addressPoint = [];
+            addressPoint.push(addr_json[i].lon);
+            addressPoint.push(addr_json[i].lat);
+            addressPoint.push('地址:'+addr_json[i].address);
+            addressAll.push(addressPoint);
+            $('.add_result_content').append('<li>'+addr_json[i].address+'</li>')
+        }
+        for(var i=0;i<addressAll.length;i++){
+
+
+            var myIcon = new BMap.Icon("http://a.tiles.mapbox.com/v3/marker/pin-m-w+009f9f.png", new BMap.Size(50,50));
+            var marker = new BMap.Marker(new BMap.Point(addressAll[i][0],addressAll[i][1]),{icon:myIcon});  // 创建标注
+
+            map.addOverlay(marker);
+
+        }
+    }
+
+    function detail_f(){
+        $('.detail_con').css('display','block');
+        $('.time_con').css('display','none');
+    }
+
+    function time_f() {
+        $('.detail_con').css('display','none');
+        $('.time_con').css('display','block');
+    }
+
+
+    var marker;
+    var opts = {
+        width:250,
+        height:200,
+    };
+
+
+
+
+    $('.btn').click(function () { //展示选定区域的所有店铺
+        var addr=$('#province').val()+$('#city').val();
+        $('.add_result_content').empty();
+        $('#tags').val('');
+        var addressList=[];
+        for(var i = 0; i<addr_json.length;i++){
+            if(addr_json[i].provice+addr_json[i].city==addr){
+                // console.log(addr_json[i].address);
+                $('.add_result_content').append('<li>'+addr_json[i].address+'</li>')
+                var addressContent=[];
+                addressContent.push(addr_json[i].lon);//0
+                addressContent.push(addr_json[i].lat);//1
+                addressContent.push('地址:'+addr_json[i].address);//2
+                addressContent.push(addr_json[i].time);//3
+                addressContent.push(addr_json[i].detail);//4
+                addressContent.push(addr_json[i].address)//5
+                addressList.push(addressContent)
+            }
+        }
+
+        console.log(addressList);
+        map.clearOverlays();
+        for(var i=0;i<addressList.length;i++){
+            map.centerAndZoom(new BMap.Point(addressList[i][0],addressList[i][1]), 13);
+            // console.log(new BMap.Point(addressList[i][0],addressList[i][1]));
+
+            var myIcon = new BMap.Icon("http://a.tiles.mapbox.com/v3/marker/pin-m-w+009f9f.png", new BMap.Size(50,50));
+            var marker = new BMap.Marker(new BMap.Point(addressList[i][0],addressList[i][1]),{icon:myIcon});  // 创建标注
+            // var content ='<div class="messageTitle">'+addressList[i][2]+'</div>'
+            var content ='<div id="menu"><ul id="nav">' +
+                '<li class="detail" onclick="detail_f(this)">store detail</li><li class="time" onclick="time_f(this)">opening time</li></ul><div id="menu_con">'+
+                '<div class="detail_con" style="display: none;"><p>'+ addressList[i][3][0]+'</p><p>'+addressList[i][3][1]+'</p></div>'+
+                '<div class="time_con" style="display: block;"><p>'+addressList[i][4][0]+'</p><p>'+addressList[i][4][1]+'</p></div>'+
+                '</div>'
+            map.addOverlay(marker);
+            addClickHandler(content,marker);
+            //marker.enableDragging();
+        }
+        function addClickHandler(content,marker) {
+            marker.addEventListener("click",function (e) {
+
+                openInfo(content,e);
+            })
+        }
+        function openInfo(content,e) {
+            var p = e.target;
+            var point = new BMap.Point(p.getPosition().lng,p.getPosition().lat);
+            var infoWindow = new BMap.InfoWindow(content,opts);
+            map.openInfoWindow(infoWindow,point);
+
+        }
+        $('.add_result_content li').click(function () {
+            var addr = $(this).text();
+
+            console.log(addr);
+            // 将地址解析结果显示在地图上,并调整地图视野
+            for(var i = 0;i<addressList.length;i++){
+                // console.log('sfs');
+                if(addr==addressList[i][5]){
+
+                    map.centerAndZoom(new BMap.Point(addressList[i][0],addressList[i][1]),17);
+                    map.panTo(new BMap.Point(addressList[i][0],addressList[i][1]))
+
+                }
+            }
+
+        })
+
+    });
+
+
+
+
+</script>
+</html>
